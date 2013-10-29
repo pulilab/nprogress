@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name='viewport' content='width=device-width,initial-scale=1.0'>
+  <title>Tests</title>
+  <link rel='stylesheet' href='../nprogress.css'>
+
+  <!-- mocha -->
+  <script src='../vendor/jquery-1.10.js'></script>
+  
+  <!-- simpletap -->
+  <script src='../nprogress.js'></script>
+  <style>
+  #c1, #c2 {
+    height: 50px;
+    width: 150px;
+    margin: 20px auto;
+    position: relative;
+  }
+  #c1 {
+    background-color: #fff;
+    border: 2px solid #f00;
+  }
+  #c2 {
+    background-color: #aaa;
+    border: 2px solid #f00; 
+  }
+   
+  </style>
+</head>
+<body>
+  <div id="mocha"></div>
+  <div id="testhandler">
+    <div id="c1"></div>
+    <div id="c2"></div>
+  </div>
+</body>
+</html>

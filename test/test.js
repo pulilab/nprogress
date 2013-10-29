@@ -7,14 +7,14 @@
 
     beforeEach(function() {
       $ = w.jQuery || require('jquery');
-      NProgress = w.NProgress || require('nprogress');
-
+      // NProgress = w.NProgress || require('nprogress');
+      NProgress = $(document.body).NProgress().nProgress;
       this.settings = $.extend({}, NProgress.settings);
     });
 
     afterEach(function() {
-      $("#nprogress").remove();
-      $('html').attr('class', '');
+      $(".nprogress").remove();
+      $('body').attr('class', '');
       NProgress.status = null;
 
       // Restore settings
@@ -24,32 +24,32 @@
     describe('.set()', function() {
       it('.set(0) must render', function(done) {
         NProgress.set(0);
-        assert.equal($("#nprogress").length, 1);
-        assert.equal($("#nprogress .bar").length, 1);
-        assert.equal($("#nprogress .peg").length, 1);
-        assert.equal($("#nprogress .spinner").length, 1);
+        assert.equal($(".nprogress").length, 1);
+        assert.equal($(".nprogress .bar").length, 1);
+        assert.equal($(".nprogress .peg").length, 1);
+        assert.equal($(".nprogress .spinner").length, 1);
         done();
       });
 
       it('.set(1) should appear and disappear', function(done) {
         NProgress.configure({ speed: 10 });
         NProgress.set(0).set(1);
-        assert.equal($("#nprogress").length, 1);
+        assert.equal($(".nprogress").length, 1);
 
         setTimeout(function() {
-          assert.equal($("#nprogress").length, 0);
+          assert.equal($(".nprogress").length, 0);
           done();
         }, 70);
       });
 
       it('must respect minimum', function() {
         NProgress.set(0);
-        assert.equal(NProgress.status, NProgress.settings.minimum);
+        assert.equal(NProgress.status, NProgress.options.minimum);
       });
 
       it('must clamp to minimum', function() {
         NProgress.set(-100);
-        assert.equal(NProgress.status, NProgress.settings.minimum);
+        assert.equal(NProgress.status, NProgress.options.minimum);
       });
 
       it('must clamp to maximum', function() {
@@ -63,13 +63,13 @@
     describe('.start()', function() {
       it('must render', function(done) {
         NProgress.start();
-        assert.equal($("#nprogress").length, 1);
+        assert.equal($(".nprogress").length, 1);
         done();
       });
 
       it('must respect minimum', function() {
         NProgress.start();
-        assert.equal(NProgress.status, NProgress.settings.minimum);
+        assert.equal(NProgress.status, NProgress.options.minimum);
       });
     });
 
@@ -78,13 +78,13 @@
     describe('.done()', function() {
       it('must not render without start', function(done) {
         NProgress.done();
-        assert.equal($("#nprogress").length, 0);
+        assert.equal($(".nprogress").length, 0);
         done();
       });
 
       it('.done(true) must render', function(done) {
         NProgress.done(true);
-        assert.equal($("#nprogress").length, 1);
+        assert.equal($(".nprogress").length, 1);
         done();
       });
     });
@@ -94,12 +94,12 @@
     describe('.inc()', function() {
       it('should render', function() {
         NProgress.inc();
-        assert.equal($("#nprogress").length, 1);
+        assert.equal($(".nprogress").length, 1);
       });
 
       it('should start with minimum', function() {
         NProgress.inc();
-        assert.equal(NProgress.status, NProgress.settings.minimum);
+        assert.equal(NProgress.status, NProgress.options.minimum);
       });
 
       it('should increment', function() {
@@ -121,7 +121,7 @@
     describe('.configure()', function() {
       it('should work', function() {
         NProgress.configure({ minimum: 0.5 });
-        assert.equal(NProgress.settings.minimum, 0.5);
+        assert.equal(NProgress.options.minimum, 0.5);
       });
     });
 
@@ -131,20 +131,51 @@
       it('should render spinner by default', function() {
         NProgress.start();
 
-        assert.equal($("#nprogress .spinner").length, 1);
+        assert.equal($(".nprogress .spinner").length, 1);
       });
 
       it('should be true by default', function() {
-        assert.equal(NProgress.settings.showSpinner, true);
+        assert.equal(NProgress.options.showSpinner, true);
       });
 
       it('should hide (on false)', function() {
         NProgress.configure({ showSpinner: false });
         NProgress.start();
 
-        assert.equal($("#nprogress .spinner").length, 0);
+        assert.equal($(".nprogress .spinner").length, 0);
       });
     });
   });
+
+  testSuite('NProgress on element', function() {
+    var $, NProgress;
+
+    beforeEach(function() {
+      $ = w.jQuery || require('jquery');
+      // NProgress = w.NProgress || require('nprogress');
+      NProgress = $("#c1").NProgress().nProgress;
+      this.settings = $.extend({}, NProgress.settings);
+    });
+
+    afterEach(function() {
+      $("#c1 .nprogress").remove();
+      $('#c1').attr('class', '');
+      NProgress.status = null;
+
+      // Restore settings
+      $.extend(NProgress.settings, this.settings);
+    });
+
+    describe('.set()', function() {
+      it('.set(0) must render', function(done) {
+        NProgress.set(0);
+        assert.equal($("#c1 .nprogress").length, 1);
+        assert.equal($("#c1 .nprogress .bar").length, 1);
+        assert.equal($("#c1 .nprogress .peg").length, 1);
+        assert.equal($("#c1 .nprogress .spinner").length, 1);
+        done();
+      });
+    });
+  })
 
 })();

@@ -1,33 +1,49 @@
 /*! NProgress (c) 2013, Rico Sta. Cruz
  *  http://ricostacruz.com/nprogress */
 
-;(function(factory) {
+;(function($) {
+  var NProgress = function(el, options) {
+    var _this = this;
+    this.el = el;
+    this.options = options;
 
-  if (typeof module === 'function') {
-    module.exports = factory(this.jQuery || require('jquery'));
-  } else if (typeof define === 'function' && define.amd) {
-    define(['jquery'], function($) {
-      return factory($);
-    });
-  } else {
-    this.NProgress = factory(this.jQuery);
-  }
+    /**
+     * Waits for all supplied jQuery promises and
+     * increases the progress as the promises resolve.
+     * 
+     * @param $promise jQUery Promise
+     */
+    (function(NProgress) {
+      var initial = 0, current = 0;
+      
+      NProgress.promise = function($promise) {
+        if (!$promise || $promise.state() == "resolved") {
+          return this;
+        }
+        
+        if (current == 0) {
+          NProgress.start();
+        }
+        
+        initial++;
+        current++;
+        
+        $promise.always(function() {
+          current--;
+          if (current == 0) {
+              initial = 0;
+              NProgress.done();
+          } else {
+              NProgress.set((initial - current) / initial);
+          }
+        });
+        
+        return NProgress;
+      };
+      
+    })(this);
 
-})(function($) {
-  var NProgress = {};
-
-  NProgress.version = '0.1.2';
-
-  var Settings = NProgress.settings = {
-    minimum: 0.08,
-    easing: 'ease',
-    positionUsing: '',
-    speed: 200,
-    trickle: true,
-    trickleRate: 0.02,
-    trickleSpeed: 800,
-    showSpinner: true,
-    template: '<div class="bar" role="bar"><div class="peg"></div></div><div class="spinner" role="spinner"><div class="spinner-icon"></div></div>'
+    return this;
   };
 
   /**
@@ -37,8 +53,8 @@
    *       minimum: 0.1
    *     });
    */
-  NProgress.configure = function(options) {
-    $.extend(Settings, options);
+  NProgress.prototype.configure = function(options) {
+    $.extend(this.options, options);
     return this;
   };
 
@@ -46,7 +62,7 @@
    * Last number.
    */
 
-  NProgress.status = null;
+  NProgress.prototype.status = null;
 
   /**
    * Sets the progress bar status, where `n` is a number from `0.0` to `1.0`.
@@ -55,25 +71,26 @@
    *     NProgress.set(1.0);
    */
 
-  NProgress.set = function(n) {
-    var started = NProgress.isStarted();
+  NProgress.prototype.set = function(n) {
+    var _this = this;
+    var started = this.isStarted();
 
-    n = clamp(n, Settings.minimum, 1);
-    NProgress.status = (n === 1 ? null : n);
+    n = clamp(n, this.options.minimum, 1);
+    this.status = (n === 1 ? null : n);
 
-    var $progress = NProgress.render(!started),
+    var $progress = this.render(!started),
         $bar      = $progress.find('[role="bar"]'),
-        speed     = Settings.speed,
-        ease      = Settings.easing;
+        speed     = this.options.speed,
+        ease      = this.options.easing;
 
     $progress[0].offsetWidth; /* Repaint */
 
     $progress.queue(function(next) {
       // Set positionUsing if it hasn't already been set
-      if (Settings.positionUsing === '') Settings.positionUsing = NProgress.getPositioningCSS();
+      if (_this.options.positionUsing === '') _this.options.positionUsing = NProgress.getPositioningCSS();
 
       // Add transition
-      $bar.css(barPositionCSS(n, speed, ease));
+      $bar.css(barPositionCSS.call(_this, n, speed, ease));
 
       if (n === 1) {
         // Fade out
@@ -83,7 +100,7 @@
         setTimeout(function() {
           $progress.css({ transition: 'all '+speed+'ms linear', opacity: 0 });
           setTimeout(function() {
-            NProgress.remove();
+            _this.remove();
             next();
           }, speed);
         }, speed);
@@ -95,8 +112,8 @@
     return this;
   };
 
-  NProgress.isStarted = function() {
-    return typeof NProgress.status === 'number';
+  NProgress.prototype.isStarted = function() {
+    return typeof this.status === 'number';
   };
 
   /**
@@ -106,18 +123,19 @@
    *     NProgress.start();
    *
    */
-  NProgress.start = function() {
-    if (!NProgress.status) NProgress.set(0);
+  NProgress.prototype.start = function() {
+    if (!this.status) this.set(0);
+    var _this = this;
 
     var work = function() {
       setTimeout(function() {
-        if (!NProgress.status) return;
-        NProgress.trickle();
+        if (!_this.status) return;
+        _this.trickle();
         work();
-      }, Settings.trickleSpeed);
+      }, _this.options.trickleSpeed);
     };
 
-    if (Settings.trickle) work();
+    if (this.options.trickle) work();
 
     return this;
   };
@@ -134,94 +152,58 @@
    *     NProgress.done(true);
    */
 
-  NProgress.done = function(force) {
-    if (!force && !NProgress.status) return this;
+  NProgress.prototype.done = function(force) {
+    if (!force && !this.status) return this;
 
-    return NProgress.inc(0.3 + 0.5 * Math.random()).set(1);
+    return this.inc(0.3 + 0.5 * Math.random()).set(1);
   };
 
   /**
    * Increments by a random amount.
    */
 
-  NProgress.inc = function(amount) {
-    var n = NProgress.status;
+  NProgress.prototype.inc = function(amount) {
+    var n = this.status;
 
     if (!n) {
-      return NProgress.start();
+      return this.start();
     } else {
       if (typeof amount !== 'number') {
         amount = (1 - n) * clamp(Math.random() * n, 0.1, 0.95);
       }
 
       n = clamp(n + amount, 0, 0.994);
-      return NProgress.set(n);
+      return this.set(n);
     }
   };
 
-  NProgress.trickle = function() {
-    return NProgress.inc(Math.random() * Settings.trickleRate);
+  NProgress.prototype.trickle = function() {
+    return this.inc(Math.random() * this.options.trickleRate);
   };
-
-  /**
-   * Waits for all supplied jQuery promises and
-   * increases the progress as the promises resolve.
-   * 
-   * @param $promise jQUery Promise
-   */
-  (function() {
-    var initial = 0, current = 0;
-    
-    NProgress.promise = function($promise) {
-      if (!$promise || $promise.state() == "resolved") {
-        return this;
-      }
-      
-      if (current == 0) {
-        NProgress.start();
-      }
-      
-      initial++;
-      current++;
-      
-      $promise.always(function() {
-        current--;
-        if (current == 0) {
-            initial = 0;
-            NProgress.done();
-        } else {
-            NProgress.set((initial - current) / initial);
-        }
-      });
-      
-      return this;
-    };
-    
-  })();
 
   /**
    * (Internal) renders the progress bar markup based on the `template`
    * setting.
    */
 
-  NProgress.render = function(fromStart) {
-    if (NProgress.isRendered()) return $("#nprogress");
-    $('html').addClass('nprogress-busy');
+  NProgress.prototype.render = function(fromStart) {
+    if (this.isRendered()) return $(".nprogress", this.el);
+    $(this.el).addClass('nprogress-busy');
 
-    var $el = $("<div id='nprogress'>")
-      .html(Settings.template);
+    var $el = $("<div class='nprogress'>")
+      .html(this.options.template);
 
-    var perc = fromStart ? '-100' : toBarPerc(NProgress.status || 0);
+    var perc = fromStart ? '-100' : toBarPerc(this.status || 0);
 
     $el.find('[role="bar"]').css({
       transition: 'all 0 linear',
       transform: 'translate3d('+perc+'%,0,0)'
     });
 
-    if (!Settings.showSpinner)
+    if (!this.options.showSpinner)
       $el.find('[role="spinner"]').remove();
 
-    $el.appendTo(document.body);
+    $el.appendTo(this.el);
 
     return $el;
   };
@@ -230,17 +212,17 @@
    * Removes the element. Opposite of render().
    */
 
-  NProgress.remove = function() {
-    $('html').removeClass('nprogress-busy');
-    $('#nprogress').remove();
+  NProgress.prototype.remove = function() {
+    $('.nprogress', this.el).remove();
+    $(this.el).removeClass('nprogress-busy');
   };
 
   /**
    * Checks if the progress bar is rendered.
    */
 
-  NProgress.isRendered = function() {
-    return ($("#nprogress").length > 0);
+  NProgress.prototype.isRendered = function() {
+    return ($('.nprogress', this.el).length > 0);
   };
 
   /**
@@ -267,6 +249,21 @@
       // Browsers without translate() support, e.g. IE7-8
       return 'margin';
     }
+  };
+
+  NProgress.version = '0.1.2';
+
+  NProgress.defaults = {
+    el: document.body,
+    minimum: 0.08,
+    easing: 'ease',
+    positionUsing: '',
+    speed: 200,
+    trickle: true,
+    trickleRate: 0.02,
+    trickleSpeed: 800,
+    showSpinner: true,
+    template: '<div class="bar" role="bar"><div class="peg"></div></div><div class="spinner" role="spinner"><div class="spinner-icon"></div></div>'
   };
 
   /**
@@ -297,9 +294,9 @@
   function barPositionCSS(n, speed, ease) {
     var barCSS;
 
-    if (Settings.positionUsing === 'translate3d') {
+    if (this.options.positionUsing === 'translate3d') {
       barCSS = { transform: 'translate3d('+toBarPerc(n)+'%,0,0)' };
-    } else if (Settings.positionUsing === 'translate') {
+    } else if (this.options.positionUsing === 'translate') {
       barCSS = { transform: 'translate('+toBarPerc(n)+'%,0)' };
     } else {
       barCSS = { 'margin-left': toBarPerc(n)+'%' };
@@ -310,6 +307,13 @@
     return barCSS;
   }
 
-  return NProgress;
-});
+  $.fn.NProgress = function(options) {
+    if(!$(this).data('nprogress')) {
+      var Settings = $.extend( {}, NProgress.defaults, options );
+      $(this).data('nprogress', new NProgress(this, Settings));
+    } 
+    return $(this).data('nprogress');
+  };
+
+}(jQuery))
 
