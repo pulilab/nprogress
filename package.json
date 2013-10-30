@@ -1,10 +1,10 @@
 {
-  "name": "nprogress",
-  "author": "Rico Sta. Cruz <hi@ricostacruz.com>",
+  "name": "jquery.nprogress",
+  "author": "Viktor Nagy, Rico Sta. Cruz <hi@ricostacruz.com>",
   "version": "0.1.2",
   "repository": {
      "type": "git",
-     "url": "https://github.com/rstacruz/nprogress.git"
+     "url": "https://github.com/pulilab/nprogress.git"
   },
   "scripts": {
     "test": "./node_modules/.bin/mocha -R spec"

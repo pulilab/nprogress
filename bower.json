@@ -1,7 +1,7 @@
 {
   "name": "jquery.nprogress",
   "repo": "pulilab/nprogress",
-  "description": "slim progress bar built upon nprogress",
+  "description": "slim progress bar built upon rstacruz's nprogress",
   "version": "0.1.2",
   "keywords": [
     "progress",
@@ -10,6 +10,10 @@
   ],
   "dependencies": {
     "jquery": "*"
+  },
+  "development": {
+    "chaijs/chai": "*",
+    "visionmedia/mocha": "*"
   },
   "license": "MIT",
   "main": "nprogress.js",
@@ -22,6 +26,8 @@
   "ignore": [
     "**/.*",
     "node_modules",
-    "components"
+    "components",
+    "vendor",
+    "support"
   ]
 }
