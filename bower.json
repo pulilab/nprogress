@@ -1,7 +1,7 @@
 {
-  "name": "nprogress",
-  "repo": "rstacruz/nprogress",
-  "description": "slim progress bar",
+  "name": "jquery.nprogress",
+  "repo": "pulilab/nprogress",
+  "description": "slim progress bar built upon nprogress",
   "version": "0.1.2",
   "keywords": [
     "progress",
